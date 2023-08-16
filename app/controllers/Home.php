@@ -4,23 +4,13 @@ class Home extends Controller {
     $data['judul'] = 'Home';
     
     if(isset($_POST['submit'])) {
-      $data += [
-        'token-post-session' => $_SESSION['home-index-token'],
-        'token-post-form' => $_POST['form-token']
-      ];
-
-      if($_POST['form-token'] === $_SESSION['home-index-token']) {
-        echo "CSRF passed!";
+      if($_POST['form-token'] === $_SESSION['bug'] || $_POST['form-token'] === $_SESSION['bug-2']) {
+        echo "<br>CSRF passed!<br>";
       }
-
-      echo '<pre>';
-      var_dump($data);
-      echo '</pre>';
     }
 
-    $data['form-token'] = bin2hex(random_bytes(32));
-    $_SESSION['home-index-token'] = $data['form-token'];
-
+    $data['form-token'] = $_SESSION['token'];
+    
     $this->view('template/header', $data);
     $this->view('home/index', $data);
     $this->view('template/footer');
