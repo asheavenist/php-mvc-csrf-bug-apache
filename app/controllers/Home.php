@@ -2,24 +2,24 @@
 class Home extends Controller {
   public function index() {
     $data['judul'] = 'Home';
-    
-    if(isset($_POST['submit'])) {
-      $data += [
-        'token-post-session' => $_SESSION['home-index-token'],
-        'token-post-form' => $_POST['form-token']
-      ];
 
-      if($_POST['form-token'] === $_SESSION['home-index-token']) {
-        echo "CSRF passed!";
-      }
-
-      echo '<pre>';
-      var_dump($data);
-      echo '</pre>';
+    /** CSRF Feature */
+    $data['generated-csrf-token'] = bin2hex(random_bytes(32));
+    if(!isset($_SESSION['form-token'])) {
+      $_SESSION['form-token'] = $data['generated-csrf-token'];
+      $_SESSION['form-token-2'] = $data['generated-csrf-token'];
+      $data['form-token'] = $data['generated-csrf-token'];
+    } else {
+      $data['form-token'] = $_SESSION['form-token'];
+      unset($_SESSION['form-token']);
     }
+    /** END- CSRF Feature */
 
-    $data['form-token'] = bin2hex(random_bytes(32));
-    $_SESSION['home-index-token'] = $data['form-token'];
+    /** Debug only */
+    echo '<pre>';
+    var_dump($data, $_SESSION);
+    echo '</pre>';
+    /** End- Debug only */
 
     $this->view('template/header', $data);
     $this->view('home/index', $data);
