@@ -1,25 +1,36 @@
 <?php
 class Home extends Controller {
   public function index() {
-    $data['judul'] = 'Home';
-    
-    if(isset($_POST['submit'])) {
-      $data += [
-        'token-post-session' => $_SESSION['home-index-token'],
-        'token-post-form' => $_POST['form-token']
-      ];
+    if(!empty($_POST)) {
+      if(!Token::validated()) {
+        echo json_encode([
+          'status' => 'Error',
+          'message' => 'CSRF validation failed!',
+          'data-session' => $_SESSION['csrf-token'],
+          'data-post' => $_POST['form-token']
+        ]);
 
-      if($_POST['form-token'] === $_SESSION['home-index-token']) {
-        echo "CSRF passed!";
-      }
+        exit;
+      };
 
-      echo '<pre>';
-      var_dump($data);
-      echo '</pre>';
+      echo json_encode([
+        'status' => 'OK',
+        'message' => 'CSRF passed!',
+        'data-session' => $_SESSION['csrf-token'],
+        'data-post' => $_POST['form-token']
+      ]);
+
+      exit;
     }
 
-    $data['form-token'] = bin2hex(random_bytes(32));
-    $_SESSION['home-index-token'] = $data['form-token'];
+    $token = Token::generate();
+
+    $_SESSION['csrf-token'] = $token;
+
+    $data = [
+      'judul' => 'Home',
+      'form-token' => $token
+    ];
 
     $this->view('template/header', $data);
     $this->view('home/index', $data);
